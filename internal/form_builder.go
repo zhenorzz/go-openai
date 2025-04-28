@@ -36,14 +36,22 @@ func NewFormBuilder(body io.Writer) *DefaultFormBuilder {
 }
 
 func (fb *DefaultFormBuilder) CreateFormFile(fieldname string, file *os.File) error {
-	return fb.createFormFile(fieldname, file, file.Name())
+	mtype, err := mimetype.DetectReader(file)
+	if err != nil {
+		return err
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return err
+	}
+	contentType := mtype.String()
+	return fb.createFormFile(fieldname, file, file.Name(), contentType)
 }
 
 func (fb *DefaultFormBuilder) CreateFormFileReader(fieldname string, r io.Reader, filename string) error {
-	return fb.createFormFile(fieldname, r, path.Base(filename))
+	return fb.createFormFile(fieldname, r, path.Base(filename), "application/octet-stream")
 }
 
-func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string) error {
+func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string, contentType string) error {
 	if filename == "" {
 		return fmt.Errorf("filename cannot be empty")
 	}
@@ -52,13 +60,7 @@ func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, file
 	h.Set("Content-Disposition",
 		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
 			escapeQuotes(fieldname), escapeQuotes(filename)))
-
-	mtype, err := mimetype.DetectReader(r)
-	if err != nil {
-		return err
-	}
-
-	h.Set("Content-Type", mtype.String())
+	h.Set("Content-Type", contentType)
 
 	fieldWriter, err := fb.writer.CreatePart(h)
 	if err != nil {
