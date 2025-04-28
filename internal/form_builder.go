@@ -1,11 +1,15 @@
 package openai
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/gabriel-vasile/mimetype"
 	"io"
 	"mime/multipart"
+	"net/textproto"
 	"os"
 	"path"
+	"strings"
 )
 
 type FormBuilder interface {
@@ -14,6 +18,12 @@ type FormBuilder interface {
 	WriteField(fieldname, value string) error
 	Close() error
 	FormDataContentType() string
+}
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
 }
 
 type DefaultFormBuilder struct {
@@ -39,7 +49,19 @@ func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, file
 		return fmt.Errorf("filename cannot be empty")
 	}
 
-	fieldWriter, err := fb.writer.CreateFormFile(fieldname, filename)
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(fieldname), escapeQuotes(filename)))
+
+	mtype, err := mimetype.DetectReader(r)
+	if err != nil {
+		return err
+	}
+
+	h.Set("Content-Type", mtype.String())
+
+	fieldWriter, err := fb.writer.CreatePart(h)
 	if err != nil {
 		return err
 	}
