@@ -1,7 +1,6 @@
 package openai
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/gabriel-vasile/mimetype"
 	"io"
