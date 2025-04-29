@@ -66,12 +66,12 @@ type ImageResponseDataInner struct {
 }
 
 type ImageResponseUsage struct {
-	InputTokens        string `json:"input_tokens,omitempty"`
-	OutputTokens       string `json:"output_tokens,omitempty"`
-	TotalTokens        string `json:"total_tokens,omitempty"`
+	InputTokens        int `json:"input_tokens,omitempty"`
+	OutputTokens       int `json:"output_tokens,omitempty"`
+	TotalTokens        int `json:"total_tokens,omitempty"`
 	InputTokensDetails struct {
-		ImageTokens string `json:"image_tokens,omitempty"`
-		TextTokens  string `json:"text_tokens,omitempty"`
+		ImageTokens int `json:"image_tokens,omitempty"`
+		TextTokens  int `json:"text_tokens,omitempty"`
 	} `json:"input_tokens_details,omitempty"`
 }
 
