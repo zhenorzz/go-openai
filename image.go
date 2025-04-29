@@ -143,6 +143,13 @@ func (c *Client) CreateEditImage(ctx context.Context, request ImageEditRequest) 
 		}
 	}
 
+	if request.Background != "" {
+		err = builder.WriteField("background", request.Background)
+		if err != nil {
+			return
+		}
+	}
+
 	if request.Quality != "" {
 		err = builder.WriteField("quality", request.Quality)
 		if err != nil {
