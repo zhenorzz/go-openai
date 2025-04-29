@@ -48,6 +48,7 @@ type ImageRequest struct {
 	Style          string `json:"style,omitempty"`
 	ResponseFormat string `json:"response_format,omitempty"`
 	User           string `json:"user,omitempty"`
+	Background     string `json:"background,omitempty"`
 }
 
 // ImageResponse represents a response structure for image API.
@@ -94,13 +95,14 @@ func (c *Client) CreateImage(ctx context.Context, request ImageRequest) (respons
 
 // ImageEditRequest represents the request structure for the image API.
 type ImageEditRequest struct {
-	Images  []*os.File `json:"image,omitempty"`
-	Mask    *os.File   `json:"mask,omitempty"`
-	Prompt  string     `json:"prompt,omitempty"`
-	Model   string     `json:"model,omitempty"`
-	N       int        `json:"n,omitempty"`
-	Size    string     `json:"size,omitempty"`
-	Quality string     `json:"quality,omitempty"`
+	Images     []*os.File `json:"image,omitempty"`
+	Mask       *os.File   `json:"mask,omitempty"`
+	Prompt     string     `json:"prompt,omitempty"`
+	Model      string     `json:"model,omitempty"`
+	N          int        `json:"n,omitempty"`
+	Size       string     `json:"size,omitempty"`
+	Quality    string     `json:"quality,omitempty"`
+	Background string     `json:"background,omitempty"`
 }
 
 // CreateEditImage - API call to create an image. This is the main endpoint of the DALL-E API.
