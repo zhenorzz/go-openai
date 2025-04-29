@@ -54,7 +54,7 @@ type ImageRequest struct {
 type ImageResponse struct {
 	Created int64                    `json:"created,omitempty"`
 	Data    []ImageResponseDataInner `json:"data,omitempty"`
-
+	Usage   ImageResponseUsage       `json:"usage,omitempty"`
 	httpHeader
 }
 
@@ -63,6 +63,16 @@ type ImageResponseDataInner struct {
 	URL           string `json:"url,omitempty"`
 	B64JSON       string `json:"b64_json,omitempty"`
 	RevisedPrompt string `json:"revised_prompt,omitempty"`
+}
+
+type ImageResponseUsage struct {
+	InputTokens        string `json:"input_tokens,omitempty"`
+	OutputTokens       string `json:"output_tokens,omitempty"`
+	TotalTokens        string `json:"total_tokens,omitempty"`
+	InputTokensDetails struct {
+		ImageTokens string `json:"image_tokens,omitempty"`
+		TextTokens  string `json:"text_tokens,omitempty"`
+	} `json:"input_tokens_details,omitempty"`
 }
 
 // CreateImage - API call to create an image. This is the main endpoint of the DALL-E API.
