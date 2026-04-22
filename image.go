@@ -162,17 +162,19 @@ func (f file) ContentType() string {
 // Use WrapReader to wrap an io.Reader with filename and Content-type.
 type ImageEditRequest struct {
 	// Images keeps backward compatibility with fork behavior using image[] payloads.
-	Images         []*os.File `json:"-"`
-	Image          io.Reader `json:"image,omitempty"`
-	Mask           io.Reader `json:"mask,omitempty"`
-	Prompt         string    `json:"prompt,omitempty"`
-	Model          string    `json:"model,omitempty"`
-	N              int       `json:"n,omitempty"`
-	Size           string    `json:"size,omitempty"`
-	ResponseFormat string    `json:"response_format,omitempty"`
-	Quality        string    `json:"quality,omitempty"`
-	Background     string    `json:"background,omitempty"`
-	User           string    `json:"user,omitempty"`
+	Images            []*os.File `json:"-"`
+	Image             io.Reader  `json:"image,omitempty"`
+	Mask              io.Reader  `json:"mask,omitempty"`
+	Prompt            string     `json:"prompt,omitempty"`
+	Model             string     `json:"model,omitempty"`
+	N                 int        `json:"n,omitempty"`
+	Size              string     `json:"size,omitempty"`
+	ResponseFormat    string     `json:"response_format,omitempty"`
+	Quality           string     `json:"quality,omitempty"`
+	Background        string     `json:"background,omitempty"`
+	OutputCompression int        `json:"output_compression,omitempty"`
+	OutputFormat      string     `json:"output_format,omitempty"`
+	User              string     `json:"user,omitempty"`
 }
 
 // CreateEditImage - API call to create an image. This is the main endpoint of the DALL-E API.
@@ -223,9 +225,11 @@ func (c *Client) CreateEditImage(ctx context.Context, request ImageEditRequest) 
 		return
 	}
 
-	err = builder.WriteField("response_format", request.ResponseFormat)
-	if err != nil {
-		return
+	if request.ResponseFormat != "" {
+		err = builder.WriteField("response_format", request.ResponseFormat)
+		if err != nil {
+			return
+		}
 	}
 
 	if request.Background != "" {
@@ -237,6 +241,20 @@ func (c *Client) CreateEditImage(ctx context.Context, request ImageEditRequest) 
 
 	if request.Quality != "" {
 		err = builder.WriteField("quality", request.Quality)
+		if err != nil {
+			return
+		}
+	}
+
+	if request.OutputCompression > 0 {
+		err = builder.WriteField("output_compression", strconv.Itoa(request.OutputCompression))
+		if err != nil {
+			return
+		}
+	}
+
+	if request.OutputFormat != "" {
+		err = builder.WriteField("output_format", request.OutputFormat)
 		if err != nil {
 			return
 		}

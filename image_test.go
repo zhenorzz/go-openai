@@ -136,6 +136,34 @@ func TestImageFormBuilderFailures(t *testing.T) {
 			req: ImageEditRequest{Image: bytes.NewBuffer(nil), Mask: bytes.NewBuffer(nil)},
 		},
 		{
+			name: "output_compression",
+			setup: func(fb *mockFormBuilder) {
+				fb.mockCreateFormFileReader = func(string, io.Reader, string) error { return nil }
+				fb.mockWriteField = func(field, _ string) error {
+					if field == "output_compression" {
+						return mockFailedErr
+					}
+					return nil
+				}
+				fb.mockClose = func() error { return nil }
+			},
+			req: ImageEditRequest{Image: bytes.NewBuffer(nil), Mask: bytes.NewBuffer(nil), OutputCompression: 50},
+		},
+		{
+			name: "output_format",
+			setup: func(fb *mockFormBuilder) {
+				fb.mockCreateFormFileReader = func(string, io.Reader, string) error { return nil }
+				fb.mockWriteField = func(field, _ string) error {
+					if field == "output_format" {
+						return mockFailedErr
+					}
+					return nil
+				}
+				fb.mockClose = func() error { return nil }
+			},
+			req: ImageEditRequest{Image: bytes.NewBuffer(nil), Mask: bytes.NewBuffer(nil), OutputFormat: CreateImageOutputFormatPNG},
+		},
+		{
 			name: "close",
 			setup: func(fb *mockFormBuilder) {
 				fb.mockCreateFormFileReader = func(string, io.Reader, string) error { return nil }
