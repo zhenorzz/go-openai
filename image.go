@@ -218,18 +218,14 @@ func (c *Client) CreateEditImage(ctx context.Context, request ImageEditRequest) 
 		return
 	}
 
-	if request.Size != "" {
-		err = builder.WriteField("size", request.Size)
-		if err != nil {
-			return
-		}
+	err = builder.WriteField("size", request.Size)
+	if err != nil {
+		return
 	}
 
-	if request.ResponseFormat != "" {
-		err = builder.WriteField("response_format", request.ResponseFormat)
-		if err != nil {
-			return
-		}
+	err = builder.WriteField("response_format", request.ResponseFormat)
+	if err != nil {
+		return
 	}
 
 	if request.Background != "" {

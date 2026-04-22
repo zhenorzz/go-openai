@@ -44,7 +44,7 @@ func (fb *DefaultFormBuilder) CreateFormFile(fieldname string, file *os.File) er
 		return err
 	}
 	contentType := mtype.String()
-	return fb.createFormFile(fieldname, file, file.Name(), contentType)
+	return fb.createFormFileWithContentType(fieldname, file, file.Name(), contentType)
 }
 
 // CreateFormFileReader creates a form field with a file reader.
@@ -87,7 +87,11 @@ func (fb *DefaultFormBuilder) CreateFormFileReader(fieldname string, r io.Reader
 	return nil
 }
 
-func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string, contentType string) error {
+func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string) error {
+	return fb.createFormFileWithContentType(fieldname, r, filename, "")
+}
+
+func (fb *DefaultFormBuilder) createFormFileWithContentType(fieldname string, r io.Reader, filename string, contentType string) error {
 	if filename == "" {
 		return fmt.Errorf("filename cannot be empty")
 	}
@@ -96,7 +100,9 @@ func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, file
 	h.Set("Content-Disposition",
 		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
 			escapeQuotes(fieldname), escapeQuotes(filename)))
-	h.Set("Content-Type", contentType)
+	if contentType != "" {
+		h.Set("Content-Type", contentType)
+	}
 
 	fieldWriter, err := fb.writer.CreatePart(h)
 	if err != nil {
