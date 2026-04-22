@@ -7,7 +7,7 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -47,8 +47,44 @@ func (fb *DefaultFormBuilder) CreateFormFile(fieldname string, file *os.File) er
 	return fb.createFormFile(fieldname, file, file.Name(), contentType)
 }
 
+// CreateFormFileReader creates a form field with a file reader.
+// The filename in Content-Disposition is required.
 func (fb *DefaultFormBuilder) CreateFormFileReader(fieldname string, r io.Reader, filename string) error {
-	return fb.createFormFile(fieldname, r, path.Base(filename), "application/octet-stream")
+	if filename == "" {
+		if f, ok := r.(interface{ Name() string }); ok {
+			filename = f.Name()
+		}
+	}
+	var contentType string
+	if f, ok := r.(interface{ ContentType() string }); ok {
+		contentType = f.ContentType()
+	}
+
+	h := make(textproto.MIMEHeader)
+	h.Set(
+		"Content-Disposition",
+		fmt.Sprintf(
+			`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(fieldname),
+			escapeQuotes(filepath.Base(filename)),
+		),
+	)
+	// content type is optional, but it can be set
+	if contentType != "" {
+		h.Set("Content-Type", contentType)
+	}
+
+	fieldWriter, err := fb.writer.CreatePart(h)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(fieldWriter, r)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string, contentType string) error {
@@ -76,6 +112,9 @@ func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, file
 }
 
 func (fb *DefaultFormBuilder) WriteField(fieldname, value string) error {
+	if fieldname == "" {
+		return fmt.Errorf("fieldname cannot be empty")
+	}
 	return fb.writer.WriteField(fieldname, value)
 }
 
